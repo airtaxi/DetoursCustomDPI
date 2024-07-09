@@ -37,7 +37,6 @@ public static class Handler
 
     private static bool s_dpiFunctionHooked;
     private static float s_currentDpi;
-    private static bool s_overrideDpi;
     private static void HookDpiFunctions()
     {
         if (!s_dpiFunctionHooked)
@@ -75,7 +74,6 @@ public static class Handler
     {
         HookDpiFunctions();
         s_currentDpi = dpi;
-        s_overrideDpi = true;
     }
 
     private static uint GetDpiForWindowHook(IntPtr hwnd) => (uint)s_currentDpi;
