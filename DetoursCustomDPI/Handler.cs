@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 
 namespace DetoursCustomDPI;
@@ -30,25 +29,16 @@ public static class Handler
 
     private static DEVICE_SCALE_FACTOR DpiToScaleFactor(float dpi) => (DEVICE_SCALE_FACTOR)(int)(dpi * 100 / 96.0f);
 
-    // Delegate declarations
     delegate int GetScaleFactorForDeviceDelegate(int device, ref DEVICE_SCALE_FACTOR pScale);
     delegate int GetScaleFactorForMonitorDelegate(IntPtr hMonitor, ref DEVICE_SCALE_FACTOR pScale);
     delegate int GetScaleFactorForWindowDelegate(IntPtr hwnd, ref DEVICE_SCALE_FACTOR pScale);
     delegate uint GetDpiForSystemDelegate();
     delegate uint GetDpiForWindowDelegate(IntPtr hwnd);
 
-    delegate bool PostMessageDelegate(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-    delegate IntPtr FindWindowExDelegate(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
-    delegate uint GetWindowThreadProcessIdDelegate(IntPtr hWnd, out uint lpdwProcessId);
-
-    static PostMessageDelegate PostMessage;
-    static FindWindowExDelegate FindWindowEx;
-    static GetWindowThreadProcessIdDelegate GetWindowThreadProcessId;
-
     private static bool s_dpiFunctionHooked;
-    private static float s_dpiForCurrentThread;
+    private static float s_currentDpi;
     private static bool s_overrideDpi;
-    private static void Hook()
+    private static void HookDpiFunctions()
     {
         if (!s_dpiFunctionHooked)
         {
@@ -79,37 +69,33 @@ public static class Handler
             Loader.DetourTransactionCommit();
 
             s_dpiFunctionHooked = true;
-
-            PostMessage = Marshal.GetDelegateForFunctionPointer<PostMessageDelegate>(Loader.GetProcAddress(user32, "PostMessageW"));
-            FindWindowEx = Marshal.GetDelegateForFunctionPointer<FindWindowExDelegate>(Loader.GetProcAddress(user32, "FindWindowExW"));
-            GetWindowThreadProcessId = Marshal.GetDelegateForFunctionPointer<GetWindowThreadProcessIdDelegate>(Loader.GetProcAddress(user32, "GetWindowThreadProcessId"));
         }
     }
     public static void OverrideDefaltDpi(float dpi)
     {
-        Hook();
-        s_dpiForCurrentThread = dpi;
+        HookDpiFunctions();
+        s_currentDpi = dpi;
         s_overrideDpi = true;
     }
 
-    private static uint GetDpiForWindowHook(IntPtr hwnd) => (uint)s_dpiForCurrentThread;
-    private static uint GetDpiForSystemHook() => (uint)s_dpiForCurrentThread;
+    private static uint GetDpiForWindowHook(IntPtr hwnd) => (uint)s_currentDpi;
+    private static uint GetDpiForSystemHook() => (uint)s_currentDpi;
 
     private static int GetScaleFactorForWindowHook(nint hwnd, ref DEVICE_SCALE_FACTOR pScale)
     {
-        pScale = DpiToScaleFactor(s_dpiForCurrentThread);
+        pScale = DpiToScaleFactor(s_currentDpi);
         return 0;
     }
 
     private static int GetScaleFactorForMonitorHook(nint hMonitor, ref DEVICE_SCALE_FACTOR pScale)
     {
-        pScale = DpiToScaleFactor(s_dpiForCurrentThread);
+        pScale = DpiToScaleFactor(s_currentDpi);
         return 0;
     }
 
     private static int GetScaleFactorForDeviceHook(int device, ref DEVICE_SCALE_FACTOR pScale)
     {
-        pScale = DpiToScaleFactor(s_dpiForCurrentThread);
+        pScale = DpiToScaleFactor(s_currentDpi);
         return 0;
     }
 }
