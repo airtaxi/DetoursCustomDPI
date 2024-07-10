@@ -49,9 +49,10 @@ public static class Handler
             if (user32 == IntPtr.Zero)
                 user32 = Loader.LoadLibrary("User32.dll");
 
-            var getScaleFactorForDevice = Loader.GetProcAddress(shcore, "GetScaleFactorForDevice");
-            var getScaleFactorForMonitor = Loader.GetProcAddress(shcore, "GetScaleFactorForMonitor");
-            var getScaleFactorForWindow = Loader.GetProcAddress(shcore, (IntPtr)244);
+            // It seems Unpackaged applciation doesn't need to override below functions
+            //var getScaleFactorForDevice = Loader.GetProcAddress(shcore, "GetScaleFactorForDevice");
+            //var getScaleFactorForMonitor = Loader.GetProcAddress(shcore, "GetScaleFactorForMonitor");
+            //var getScaleFactorForWindow = Loader.GetProcAddress(shcore, (IntPtr)244);
 
             var getDpiForSystem = Loader.GetProcAddress(user32, "GetDpiForSystem");
             var getDpiForWindow = Loader.GetProcAddress(user32, "GetDpiForWindow");
@@ -59,9 +60,10 @@ public static class Handler
             Loader.DetourTransactionBegin();
             Loader.DetourUpdateThread(Loader.GetCurrentThread());
 
-            Loader.DetourAttach(ref getScaleFactorForDevice, Marshal.GetFunctionPointerForDelegate< GetScaleFactorForDeviceDelegate>(GetScaleFactorForDeviceHook));
-            Loader.DetourAttach(ref getScaleFactorForMonitor, Marshal.GetFunctionPointerForDelegate<GetScaleFactorForMonitorDelegate>(GetScaleFactorForMonitorHook));
-            Loader.DetourAttach(ref getScaleFactorForWindow, Marshal.GetFunctionPointerForDelegate<GetScaleFactorForWindowDelegate>(GetScaleFactorForWindowHook));
+            //Loader.DetourAttach(ref getScaleFactorForDevice, Marshal.GetFunctionPointerForDelegate<GetScaleFactorForDeviceDelegate>(GetScaleFactorForDeviceHook));
+            //Loader.DetourAttach(ref getScaleFactorForMonitor, Marshal.GetFunctionPointerForDelegate<GetScaleFactorForMonitorDelegate>(GetScaleFactorForMonitorHook));
+            //Loader.DetourAttach(ref getScaleFactorForWindow, Marshal.GetFunctionPointerForDelegate<GetScaleFactorForWindowDelegate>(GetScaleFactorForWindowHook));
+
             Loader.DetourAttach(ref getDpiForSystem, Marshal.GetFunctionPointerForDelegate<GetDpiForSystemDelegate>(GetDpiForSystemHook));
             Loader.DetourAttach(ref getDpiForWindow, Marshal.GetFunctionPointerForDelegate<GetDpiForWindowDelegate>(GetDpiForWindowHook));
 
