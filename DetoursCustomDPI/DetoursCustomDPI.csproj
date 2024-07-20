@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
 		<Title>DetoursCustomDPI</Title>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<Authors>Howon Lee</Authors>
 		<Description>Override DPI for WinUI Unpackaged Applications using Detours.NET</Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
